@@ -23,68 +23,81 @@ class RunTask extends Command
     	$this->info('Task initiated');
     	
         $taskId = $this->argument('task_id');
-	$force = $this->option('force');
+		$force = $this->option('force');
 	
         $task = Task::find($taskId);
         if (!$task) {
-		$this->error('Task not found!');
-		return Command::FAILURE;
+			$this->error('Task not found!');
+			return Command::FAILURE;
         }
-	if (!$this->option('force')) {
-	        if (!$force && !$this->confirm("Do you really want to run '{$task->name}'?")) {
-			$this->info('Command cancelled');
-			return Command::SUCCESS;
-	        }
-        }
-	$task->status = 'running';
+		if (!$this->option('force')) {
+				if (!$force && !$this->confirm("Do you really want to run '{$task->name}'?")) {
+				$this->info('Command cancelled');
+				return Command::SUCCESS;
+			}
+		}
+		$task->status = 'running';
+		$task->save();
 
-	$script = getenv('HOME') . '/homelab/scripts/' . $task->script;
-	
-	if (empty($task->script)) {
-	throw new \RuntimeException('The task has not a defined script.');
-	}
-	
-	if (!file_exists($script)) {
-	throw new \RuntimeException('The script does not exist: {$script}');
-	}	
-	
-	$runTask = TaskRun::create([
-		'task_id' => $task->id,
-		'status' => 'running',
-		'started_at' => now(),
-	]);
-	
-    	try {
+		$script = getenv('HOME') . '/homelab/scripts/' . $task->script;
 		
-	$lines = [];
-	$exitCode = 0;
-
-	exec($script, $lines, $exitCode);
-	$output = implode(PHP_EOL, $lines);
-
-	
-	if ($exitCode == 0) {
-		$runTask->status = 'success';
-		$this->info('Task Completed Successfully');
-	} else {
-		$runTask->status = 'failed';
-		$this->info('Task Failed.');
-	}
-
-	$runTask->output = $output;
-	$runTask->finished_at = now();
-	$runTask->save();
-	$this->line($output);
-	
-	return $exitCode === 0
-		? Command::SUCCESS
-		: Command::FAILURE;
+		if (empty($task->script)) {
+		throw new \RuntimeException('The task has not a defined script.');
+		}
 		
-    	} catch (\Throwable $e) {
-    		$runTask->status = 'failed';
-    		$runTask->output = $e->getMessage();
-		return Command::FAILURE;
-    	}
-    	
-    }
+		if (!file_exists($script)) {
+			throw new \RuntimeException('The script does not exist:' . $script);
+		}	
+		
+		$runTask = TaskRun::create([
+			'task_id' => $task->id,
+			'status' => 'running',
+			'started_at' => now(),
+		]);
+		
+			try {
+			
+		$lines = [];
+		$exitCode = 0;
+
+		exec($script, $lines, $exitCode);
+		$output = implode(PHP_EOL, $lines);
+
+		
+		if ($exitCode === 0) {
+			$runTask->status = 'success';
+			$task->status = 'success';
+			$task->last_run_at = now();
+			$this->info('Task Completed Successfully');
+		} else {
+			$runTask->status = 'failed';
+			$task->status = 'failed';
+			$task->last_run_at = now();
+			$this->info('Task Failed.');
+		}
+
+		$runTask->output = $output;
+		$runTask->finished_at = now();
+		$runTask->save();
+		$task->save();
+
+		$this->line($output);
+		
+		return $exitCode === 0
+			? Command::SUCCESS
+			: Command::FAILURE;
+			
+			} catch (\Throwable $e) {
+				$runTask->status = 'failed';
+				$runTask->output = $e->getMessage();
+				$runTask->finished_at = now();
+				$runTask->save();
+
+				$task->status = 'failed';
+				$task->last_run_at = now();
+				$task->save();
+			return Command::FAILURE;
+			}
+			
+		}
 }

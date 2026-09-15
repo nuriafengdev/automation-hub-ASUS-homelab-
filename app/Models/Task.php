@@ -16,8 +16,8 @@ class Task extends Model
 	'output',
     ];
 
-    public function runs(): HasMany
+    public function runs()
     {
-	return $this->hasMany(TaskRun::class);
+		return $this->hasMany(TaskRun::class);
     }
 }
