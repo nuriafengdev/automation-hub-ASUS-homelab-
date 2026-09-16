@@ -1,13 +1,7 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Task {{ $task->id }}</title>
-</head>
-<body>
+@extends('layouts.app')
+@section('content')
     <h1>Task {{ $task->id }}</h1>
+    
     <table>
         <thead>
             <tr>
@@ -35,23 +29,44 @@
                 <th>ID</th>
                 <th>Status</th>
                 <th>Started At</th>
+                <th>Duration</th>
                 <th>Finished At</th>
-                <th>Output</th>
+                <th>Actions</th>
             </tr>
         </thead>
         @forelse ($task->runs as $run)
+        @php
+            $startedAt = $run->started_at ? \Carbon\Carbon::parse($run->started_at) : null;
+            $finishedAt = $run->finished_at ? \Carbon\Carbon::parse($run->finished_at) : null;
+
+            $duration = $startedAt && $finishedAt
+            ? number_format($finishedAt->diffInMicroseconds($startedAt) / 1000, 2) . ' ms'
+            : null;
+        @endphp
             <tr>
                 <td>{{ $run->id }}</td>
-                <td>{{ $run->status }}</td>
-                <td>{{ $run->started_at ?? 'Not started' }}</td>
-                <td>{{ $run->finished_at ?? 'Not finished' }}</td>
-                <td>{{ $run->output ?? 'No output' }}</td>
+                <td>
+                    @if ($run->status === 'success') 
+                        <span class="text-green-600">Success</span>
+                    @elseif ($run->status === 'failed')
+                        <span class="text-red-600">Failed</span>
+                    @elseif ($run->status === 'running') 
+                        <span class="text-blue-600">Running</span>
+                    @else
+                        <span class="text-gray-600">{{ ucfirst($run->status) }}</span>
+                    @endif
+                </td>
+                <td>{{ $startedAt ?? 'Not started' }}</td>
+                <td>{{ $duration ?? 'Not completed' }}</td>
+                <td>{{ $finishedAt ?? 'Not finished' }}</td>
+                <td>
+                    {{--<a href="{{ route('runs.output', $run->id) }}" class="text-blue-600 hover:text-blue-800">View Output</a>  --}}
+                </td>
             </tr>
         @empty
             <tr>
-                <td colspan="5">No runs found for this task.</td>
+                <td colspan="6">No runs found for this task.</td>
             </tr>
         @endforelse
     </table>
-</body>
-</html>
+@endsection

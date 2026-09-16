@@ -55,49 +55,49 @@ class RunTask extends Command
 			'started_at' => now(),
 		]);
 		
-			try {
+		try {
 			
-		$lines = [];
-		$exitCode = 0;
+			$lines = [];
+			$exitCode = 0;
 
-		exec($script, $lines, $exitCode);
-		$output = implode(PHP_EOL, $lines);
+			exec($script, $lines, $exitCode);
+			$output = implode(PHP_EOL, $lines);
 
-		
-		if ($exitCode === 0) {
-			$runTask->status = 'success';
-			$task->status = 'success';
-			$task->last_run_at = now();
-			$this->info('Task Completed Successfully');
-		} else {
-			$runTask->status = 'failed';
-			$task->status = 'failed';
-			$task->last_run_at = now();
-			$this->info('Task Failed.');
-		}
-
-		$runTask->output = $output;
-		$runTask->finished_at = now();
-		$runTask->save();
-		$task->save();
-
-		$this->line($output);
-		
-		return $exitCode === 0
-			? Command::SUCCESS
-			: Command::FAILURE;
 			
-			} catch (\Throwable $e) {
+			if ($exitCode === 0) {
+				$runTask->status = 'success';
+				$task->status = 'success';
+				$task->last_run_at = now();
+				$this->info('Task Completed Successfully');
+			} else {
 				$runTask->status = 'failed';
-				$runTask->output = $e->getMessage();
-				$runTask->finished_at = now();
-				$runTask->save();
-
 				$task->status = 'failed';
 				$task->last_run_at = now();
-				$task->save();
-			return Command::FAILURE;
+				$this->info('Task Failed.');
 			}
+
+			$runTask->output = $output;
+			$runTask->finished_at = now();
+			$runTask->save();
+			$task->save();
+
+			$this->line($output);
 			
+			return $exitCode === 0
+				? Command::SUCCESS
+				: Command::FAILURE;
+			
+		} catch (\Throwable $e) {
+			$runTask->status = 'failed';
+			$runTask->output = $e->getMessage();
+			$runTask->finished_at = now();
+			$runTask->save();
+
+			$task->status = 'failed';
+			$task->last_run_at = now();
+			$task->save();
+		return Command::FAILURE;
 		}
+			
+	}
 }
