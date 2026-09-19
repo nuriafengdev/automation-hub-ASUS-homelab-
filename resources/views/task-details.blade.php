@@ -1,9 +1,11 @@
 @extends('layouts.app')
 @section('content')
-    <h1>Task {{ $task->id }}</h1>
+<div class="flex flex-col p-4 w-full h-full overflow-y-auto">
+
+    <h1 class="text-2xl font-bold mb-4">Task {{ $task->id }}</h1>
     
-    <table>
-        <thead>
+    <table class="w-full mt-4 border border-[#E2E8F0] rounded-lg overflow-hidden shadow-md justify-content text-center">
+        <thead class="bg-gray-200 py-2">
             <tr>
                 <th>Task</th>
                 <th>Script</th>
@@ -22,9 +24,9 @@
                 </tr>
         </tbody>
     </table>
-    <h2>Task History</h2>
-    <table>
-        <thead>
+    <h2 class="text-xl font-bold mt-4">Task History</h2>
+    <table class="w-full mt-4 border border-[#E2E8F0] rounded-lg overflow-hidden shadow-md justify-content text-center">
+        <thead class="bg-gray-200 py-2">
             <tr>
                 <th>ID</th>
                 <th>Status</th>
@@ -46,15 +48,7 @@
             <tr>
                 <td>{{ $run->id }}</td>
                 <td>
-                    @if ($run->status === 'success') 
-                        <span class="text-green-600">Success</span>
-                    @elseif ($run->status === 'failed')
-                        <span class="text-red-600">Failed</span>
-                    @elseif ($run->status === 'running') 
-                        <span class="text-blue-600">Running</span>
-                    @else
-                        <span class="text-gray-600">{{ ucfirst($run->status) }}</span>
-                    @endif
+                    <x-status-badge :status="$task->status" />
                 </td>
                 <td>{{ $startedAt ?? 'Not started' }}</td>
                 <td>{{ $duration ?? 'Not completed' }}</td>
@@ -69,4 +63,5 @@
             </tr>
         @endforelse
     </table>
+</div>
 @endsection
