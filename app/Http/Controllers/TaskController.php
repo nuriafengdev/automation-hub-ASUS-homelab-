@@ -35,4 +35,21 @@ class TaskController extends Controller
 		$task->load('runs');
 		return view('task-details', compact('task'));
 	}
+
+	public function showOutput(TaskRun $taskRun)
+	{
+		$output = TaskRun::find($taskRun->id)->output;
+		return view ('task-output', compact('taskRun', 'output'));
+	}
+
+	public function showTasks()
+	{
+		$tasks = Task::all();
+		return view('tasks', compact('tasks'));
+	}
+
+	public function create()
+	{
+		return view('tasks-create');
+	}
 }

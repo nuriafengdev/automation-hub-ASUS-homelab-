@@ -9,6 +9,10 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', [TaskController::class, 'index'])->name('dashboard');
-Route::post('/dashboard/task', [TaskController::class, 'store'])->name('task-store');
-
 Route::get('/dashboard/task/{task}', [TaskController::class, 'show'])->name('task-details');
+
+Route::post('/tasks', [TaskController::class, 'store'])->name('task-store');
+Route::get('/tasks', [TaskController::class, 'showTasks'])->name('tasks');
+Route::get('/tasks/create', [TaskController::class, 'create'])->name('tasks.create');
+Route::get('/task-details/{taskRun}', [TaskController::class, 'showOutput'])->name('runs.output');
+

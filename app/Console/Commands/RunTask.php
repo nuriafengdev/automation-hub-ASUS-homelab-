@@ -61,6 +61,8 @@ class RunTask extends Command
 			$exitCode = 0;
 
 			exec($script, $lines, $exitCode);
+			$this->info("Script: " . $script);
+			$this->info("Exit code: " . $exitCode);
 			$output = implode(PHP_EOL, $lines);
 
 			

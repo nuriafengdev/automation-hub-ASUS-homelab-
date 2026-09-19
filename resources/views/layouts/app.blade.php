@@ -12,7 +12,7 @@
         <div class="flex flex-col justify-center gap-2">
             <h2 class="text-lg font-bold py-3">Automation Hub</h2>
             <a href="{{ route('dashboard') }}" class="hover:bg-[#2563EB] hover:text-white p-2 rounded-lg">Dashboard</a>
-            <a href="" class="hover:bg-[#2563EB] hover:text-white p-2 rounded-lg">Tasks</a>
+            <a href="{{ route('tasks') }}" class="hover:bg-[#2563EB] hover:text-white p-2 rounded-lg">Tasks</a>
         </div>
         <div class="flex flex-col justify-end">
             <hr class="my-2 border-gray-600">
